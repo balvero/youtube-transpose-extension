@@ -2,7 +2,7 @@
   'use strict';
 
   const YOUTUBE_EMBED_RE =
-    /^https?:\/\/(?:www\.)?(?:youtube\.com|youtube-nocookie\.com)\/embed\//;
+    /^(?:https?:)?\/\/(?:www\.)?(?:youtube\.com|youtube-nocookie\.com)\/embed\//;
   const PROCESSED_ATTR = 'data-yt-transpose-processed';
   const MSG_TYPE = 'YT_TRANSPOSE_EXT';
 
@@ -74,16 +74,27 @@
   scanForIframes();
 
   // ── Watch for dynamically added iframes (SPAs, lazy-loaded content) ──
-  if (document.body) {
-    const observer = new MutationObserver((mutations) => {
-      for (const mutation of mutations) {
-        if (mutation.addedNodes.length > 0) {
-          scanForIframes();
-          return;
-        }
+  const observer = new MutationObserver((mutations) => {
+    let shouldScan = false;
+    for (const mutation of mutations) {
+      if (mutation.addedNodes.length > 0) {
+        shouldScan = true;
+        break;
       }
-    });
+      if (mutation.type === 'attributes' && mutation.attributeName === 'src' && mutation.target.tagName === 'IFRAME') {
+        shouldScan = true;
+        break;
+      }
+    }
+    if (shouldScan) {
+      scanForIframes();
+    }
+  });
 
-    observer.observe(document.body, { childList: true, subtree: true });
-  }
+  observer.observe(document.documentElement, { 
+    childList: true, 
+    subtree: true,
+    attributes: true,
+    attributeFilter: ['src']
+  });
 })();

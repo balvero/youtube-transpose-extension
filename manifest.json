@@ -1,0 +1,43 @@
+{
+  "manifest_version": 3,
+  "name": "YouTube Transpose",
+  "version": "1.0.0",
+  "description": "Transpose the pitch of YouTube videos in real-time. Shift audio up or down by semitones without changing playback speed.",
+  "background": {
+    "service_worker": "service-worker.js"
+  },
+  "content_scripts": [
+    {
+      "matches": ["<all_urls>"],
+      "exclude_matches": [
+        "*://*.youtube.com/*",
+        "*://*.youtube-nocookie.com/*"
+      ],
+      "js": ["lib/soundtouch.js", "lib/meyda.min.js", "lib/key-detector.js", "lib/transpose-ui.js", "content/content.js"],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
+        "*://*.youtube.com/embed/*",
+        "*://*.youtube-nocookie.com/embed/*"
+      ],
+      "js": ["lib/soundtouch.js", "lib/meyda.min.js", "lib/key-detector.js", "lib/audio-pipeline.js", "embed/embed.js"],
+      "all_frames": true,
+      "run_at": "document_idle"
+    },
+    {
+      "matches": ["*://*.youtube.com/*"],
+      "exclude_matches": ["*://*.youtube.com/embed/*"],
+      "js": [
+        "lib/soundtouch.js",
+        "lib/meyda.min.js",
+        "lib/key-detector.js",
+        "lib/transpose-ui.js",
+        "lib/audio-pipeline.js",
+        "watch/watch.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "action": {}
+}
